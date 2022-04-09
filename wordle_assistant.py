@@ -25,7 +25,8 @@ while True:
     user_black = input("Black letters (seperated by \" \"): ").split(" ")
     print("Processing...")
     
-    # I could get the positions of user_yellow by asking the user for the position(s) of each letter if user_yellow is given
+    # I could get the positions of user_yellow by asking the user for the 
+    # position(s) of each letter if user_yellow is given
     
     letter_index = 0
     for letter in user_black:
@@ -173,8 +174,10 @@ while True:
     most_frequent_letters.sort(reverse=True, key=most_frequent_letters_sort)
     print("83% Created Most Frequent Letters")
 
-    # From that, print a word that contains the most amount of most frequent letters
-    # (add all of the values of the letters for every matching word and return the highest value word?) Worked!
+    # From that, print a word that contains the most amount of most frequent 
+    # letters
+    # (add all of the values of the letters for every matching word and return 
+    # the highest value word?) Worked!
     informational_words = []
     for word in pre_green_matching_words:
         frequency_score = 0
@@ -202,7 +205,7 @@ while True:
         for i in range(10):
             print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(int(round(int(most_frequent_words[i][1])/int(most_frequent_words[-1][1]), 0))) + ")")
     print("----------")
-    print("Reccomended words for maximum info: ")
+    print("Recommended words for maximum info: ")
     if len(informational_words) < 10:
         for i in range(len(most_frequent_words)):
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")")
