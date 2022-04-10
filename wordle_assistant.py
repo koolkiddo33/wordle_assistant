@@ -132,6 +132,8 @@ while True:
             word_index += 1
     print("50% Processed Green")
     
+    # OPTIMIZATION: convert unigram_freq.csv to a txt like five_letter_words.txt
+    # so it doesn't have to every time
     most_frequent_words_all = []
     f = open("unigram_freq.csv", "r")
     for line in f:
@@ -142,6 +144,10 @@ while True:
     for tup in most_frequent_words_all:
         if tup[0] in matching_words:
             most_frequent_words.append(tup)
+    total_freq = 0
+    for word in most_frequent_words:
+        freq = int(word[1])
+        total_freq += freq
     print("67% Created Most Common Words")
     
     # Most frequent letters in matching words using a list of tuples
@@ -236,18 +242,21 @@ while True:
     print(matching_words)
     print("----------")
     print("10 most common words:")
-    if len(most_frequent_words) < 10:
-        for i in range(len(most_frequent_words)):
-            print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(round(float(most_frequent_words[i][1])*100/1226734006, 2)) + "%)")
-    else:
-        for i in range(10):
-            print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(round(float(most_frequent_words[i][1])*100/1226734006, 2)) + "%)")
+    for i in range(len(most_frequent_words)):
+        percentage = ((int(most_frequent_words[i][1]))*100/total_freq + 100/len(matching_words))/2 # Add percentage of correct random guess divided by len(matching_words)
+        percentage = float(percentage)
+        percentage = round(percentage, 2)
+        print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(percentage) + "%)")
+        if i == 10:
+            break
     print("----------")
     print("10 recommended words for maximum info: ")
-    if len(informational_words) < 10:
-        for i in range(len(most_frequent_words)):
+    for i in range(len(most_frequent_words)):
+        if informational_words[i][0] in matching_words:
+            print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")*")
+        else:
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")")
-    else:
-        for i in range(10):
-            print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")")
+        if i == 10:
+            break
+    print("* Possible answer")
     print()
