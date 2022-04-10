@@ -5,9 +5,13 @@ April 2022
 """
 
 import re
+import os
+
+os.system("")
 
 file = open("five_letter_words.txt")
 txt = file.read().split("\",\"")
+file.close()
 txt.sort()
 
 while True:
@@ -16,9 +20,12 @@ while True:
         print("Incorrect number of characters")
         continue
     rez = []
+    all_green_pos = []
     i = 0
     for letter in raw_user_green:
         rez.append((letter, i))
+        if letter != "-":
+            all_green_pos.append(i)
         i += 1
     user_green = rez
     user_yellow = input("\033[1;33;48mYellow letters (seperated by \" \"): ").split(" ")
@@ -27,24 +34,22 @@ while True:
     # I could get the positions of user_yellow by asking the user for the 
     # position(s) of each letter if user_yellow is given Worked!
     if len(user_yellow) > 0:
-        user_yellow_0 = (user_yellow[0], input("Position(s) of \"" + user_yellow[0][0] + "\": ").split(" "))
+        user_yellow_0 = (user_yellow[0], input("Position(s) of yellow \"" + user_yellow[0][0] + "\": ").split(" "))
         user_yellow[0] = user_yellow_0
     if len(user_yellow) > 1:
-        user_yellow_1 = (user_yellow[1], input("Position(s) of \"" + user_yellow[1][0] + "\": ").split(" "))
+        user_yellow_1 = (user_yellow[1], input("Position(s) of yellow \"" + user_yellow[1][0] + "\": ").split(" "))
         user_yellow[1] = user_yellow_1
     if len(user_yellow) > 2:
-        user_yellow_2 = (user_yellow[2], input("Position(s) of \"" + user_yellow[2][0] + "\": ").split(" "))
+        user_yellow_2 = (user_yellow[2], input("Position(s) of yellow \"" + user_yellow[2][0] + "\": ").split(" "))
         user_yellow[2] = user_yellow_2
     if len(user_yellow) > 3:
-        user_yellow_3 = (user_yellow[3], input("Position(s) of \"" + user_yellow[3][0] + "\": ").split(" "))
+        user_yellow_3 = (user_yellow[3], input("Position(s) of yellow \"" + user_yellow[3][0] + "\": ").split(" "))
         user_yellow[3] = user_yellow_3
     if len(user_yellow) > 4:
         user_yellow_4 = (user_yellow[4], input("Position(s) of \"" + user_yellow[4][0] + "\": ").split(" "))
         user_yellow[4] = user_yellow_4
-
     user_black = input("\033[1;30;48mBlack letters (seperated by \" \"): ").split(" ")
     print("\033[0;37;48mProcessing...")
-    
     letter_index = 0
     for letter in user_black:
         if letter in raw_user_green or letter in user_yellow:
@@ -71,6 +76,26 @@ while True:
                 matching_words = matching_words[:word_index] + matching_words[word_index + 1:]
                 word_index -= 1
             word_index += 1
+        
+        # BUG: If a letter is yellow and it is in the position of a green letter,
+        # it's informational value should be 0
+        # SOLUTION?: Set the position of every yellow letter if there's a green letter
+        # Search if the yellow already has the position, if not append the pos
+        # If yellow letter in green letters, remove yellow letter Worked!
+        user_green_stripped = []
+        for letter in raw_user_green:
+            if letter != "-":
+                user_green_stripped.append(letter)
+        tup_index = 0
+        for tup in user_yellow:
+            if tup[0] in user_green_stripped:
+                user_yellow = user_yellow[:tup_index] + user_yellow[tup_index + 1:]
+                tup_index -= 1
+            for pos in all_green_pos:
+                for letter in user_green_stripped:
+                    if str(pos + 1) not in tup[1] and tup[0] != letter:
+                        tup[1].append(str(pos + 1))
+            tup_index += 1
         
         word_index = 0
         for word in matching_words:
@@ -132,14 +157,14 @@ while True:
             word_index += 1
     print("50% Processed Green")
     
-    # OPTIMIZATION: convert unigram_freq.csv to a txt like five_letter_words.txt
-    # so it doesn't have to every time
+    # OPTIMIZATION: remove the non 5 letter words from the csv and
+    # access that so it doesn't have to every time Worked? Can't really tell the diff :/
     most_frequent_words_all = []
-    f = open("unigram_freq.csv", "r")
+    f = open("freq_five_letters.txt", "r")
     for line in f:
-        if line[5] == ",":
-            line = line.strip("\n")
-            most_frequent_words_all.append((line[:5], line[6:]))
+        line = line.strip("\n")
+        most_frequent_words_all.append((line[:5], line[6:]))
+    f.close()
     most_frequent_words = []
     for tup in most_frequent_words_all:
         if tup[0] in matching_words:
@@ -219,9 +244,6 @@ while True:
     # letters
     # (add all of the values of the letters for every matching word and return 
     # the highest value word?) Worked!
-    
-    # BUG: If a letter is yellow and it is in the position of a green letter,
-    # it's informational value should be 0
     informational_words = []
     for word in pre_green_matching_words:
         frequency_score = 0
@@ -239,8 +261,10 @@ while True:
     print("\033[1;37;48m----------")
     print(str(len(matching_words)) + " possible word(s)")
     print("----------")
-    print(matching_words)
-    print("----------")
+    if len(matching_words) < 200 and len(matching_words) != 0:
+        print(matching_words)
+        print("----------")
+    # Consider printing the info along with the percentage
     print("10 most common words:")
     for i in range(len(most_frequent_words)):
         percentage = ((int(most_frequent_words[i][1]))*100/total_freq + 100/len(matching_words))/2 # Add percentage of correct random guess divided by len(matching_words)
