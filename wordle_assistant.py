@@ -271,7 +271,7 @@ while True:
         percentage = float(percentage)
         percentage = round(percentage, 2)
         print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(percentage) + "%)")
-        if i == 10:
+        if i == 9:
             break
     print("----------")
     print("10 recommended words for maximum info: ")
@@ -280,7 +280,7 @@ while True:
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")*")
         else:
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")")
-        if i == 10:
+        if i == 9:
             break
     print("* Possible answer")
     print()
