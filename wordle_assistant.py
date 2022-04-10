@@ -5,13 +5,13 @@ April 2022
 """
 
 import re
-import urllib.request
 
-with urllib.request.urlopen("http://www.instructables.com/files/orig/FLU/YE8L/H82UHPR8/FLUYE8LH82UHPR8.txt") as response:
-    txt = response.read().decode().split("\n")
-    txt = [word for word in txt if len(word) == 5]
+file = open("five_letter_words.txt")
+txt = file.read().split("\",\"")
+txt.sort()
+
 while True:
-    raw_user_green = (input("Green letters (unknown letters represented by \"-\"): "))
+    raw_user_green = (input("\033[1;32;48mGreen letters (other letters represented by \"-\"): "))
     if len(raw_user_green) != 5 and raw_user_green != "":
         print("Incorrect number of characters")
         continue
@@ -21,12 +21,29 @@ while True:
         rez.append((letter, i))
         i += 1
     user_green = rez
-    user_yellow = input("Yellow letters (seperated by \" \"): ").split(" ")
-    user_black = input("Black letters (seperated by \" \"): ").split(" ")
-    print("Processing...")
-    
+    user_yellow = input("\033[1;33;48mYellow letters (seperated by \" \"): ").split(" ")
+    if user_yellow == [""]:
+        user_yellow = []
     # I could get the positions of user_yellow by asking the user for the 
-    # position(s) of each letter if user_yellow is given
+    # position(s) of each letter if user_yellow is given Worked!
+    if len(user_yellow) > 0:
+        user_yellow_0 = (user_yellow[0], input("Position(s) of \"" + user_yellow[0][0] + "\": ").split(" "))
+        user_yellow[0] = user_yellow_0
+    if len(user_yellow) > 1:
+        user_yellow_1 = (user_yellow[1], input("Position(s) of \"" + user_yellow[1][0] + "\": ").split(" "))
+        user_yellow[1] = user_yellow_1
+    if len(user_yellow) > 2:
+        user_yellow_2 = (user_yellow[2], input("Position(s) of \"" + user_yellow[2][0] + "\": ").split(" "))
+        user_yellow[2] = user_yellow_2
+    if len(user_yellow) > 3:
+        user_yellow_3 = (user_yellow[3], input("Position(s) of \"" + user_yellow[3][0] + "\": ").split(" "))
+        user_yellow[3] = user_yellow_3
+    if len(user_yellow) > 4:
+        user_yellow_4 = (user_yellow[4], input("Position(s) of \"" + user_yellow[4][0] + "\": ").split(" "))
+        user_yellow[4] = user_yellow_4
+
+    user_black = input("\033[1;30;48mBlack letters (seperated by \" \"): ").split(" ")
+    print("\033[0;37;48mProcessing...")
     
     letter_index = 0
     for letter in user_black:
@@ -38,46 +55,65 @@ while True:
     for word in txt:
         matching_words.append(word)
     
-    if user_yellow != [""]:
-        matching_words_copy = matching_words
+    if user_yellow != []:
         word_index = 0
-        for word in matching_words_copy:
+        for word in matching_words:
             word_copy = word
             for letter in user_yellow:
                 i = 0
                 for letter2 in word_copy:
-                    if letter == letter2:
+                    if letter[0] == letter2:
                         word_copy = word_copy[:i] + word_copy[i + 1:]
                         i -= 1
                         break
                     i += 1
             if len(word_copy) != 5 - len(user_yellow):
-                matching_words_copy = matching_words_copy[:word_index] + matching_words_copy[word_index + 1:]
+                matching_words = matching_words[:word_index] + matching_words[word_index + 1:]
                 word_index -= 1
             word_index += 1
-        matching_words = matching_words_copy
+        
+        word_index = 0
+        for word in matching_words:
+            word_tuple = []
+            i = 0
+            for letter in word:
+                word_tuple.append((letter, i))
+                i += 1
+            i = 0
+            break_out_flag = False
+            for letter in user_yellow:
+                if break_out_flag:
+                    break
+                for pos in letter[1]:
+                    pos = int(pos)
+                    if break_out_flag:
+                        break
+                    for letter2 in word_tuple:
+                        if (letter[0], pos) == (letter2[0], int(letter2[1] + 1)):
+                            matching_words = matching_words[:word_index] + matching_words[word_index + 1:]
+                            word_index -= 1
+                            break_out_flag = True
+                            break
+            word_index += 1
     print("17% Processed Yellow")
     
     if user_black != [""]:
         word_index = 0
-        matching_words_copy = matching_words
-        for word in matching_words_copy:
+        for word in matching_words:
             for letter in user_black:
                 match = re.search(letter, word)
                 if match:
-                    matching_words_copy = matching_words_copy[:word_index] + matching_words_copy[word_index + 1:]
+                    matching_words = matching_words[:word_index] + matching_words[word_index + 1:]
                     word_index -= 1
                     break
             word_index += 1
-        matching_words = matching_words_copy
     print("33% Processed Black")
     
     pre_green_matching_words = matching_words
     
     if user_green != "":
-        matching_words_copy = matching_words
         word_index = 0
-        for word in matching_words_copy:
+        for word in matching_words:
             word_tuple = []
             i = 0
             for letter in word:
@@ -89,12 +125,11 @@ while True:
                     i += 1
                     continue
                 if tup != word_tuple[i]:
-                    matching_words_copy = matching_words_copy[:word_index] + matching_words_copy[word_index + 1:]
+                    matching_words = matching_words[:word_index] + matching_words[word_index + 1:]
                     word_index -= 1
                     break
                 i += 1
             word_index += 1
-        matching_words = matching_words_copy
     print("50% Processed Green")
     
     most_frequent_words_all = []
@@ -107,7 +142,7 @@ while True:
     for tup in most_frequent_words_all:
         if tup[0] in matching_words:
             most_frequent_words.append(tup)
-    print("67% Created Most Frequent Words")
+    print("67% Created Most Common Words")
     
     # Most frequent letters in matching words using a list of tuples
     most_frequent_letters = [("a", 0), ("b", 0), ("c", 0), ("d", 0), ("e", 0), ("f", 0), ("g", 0), ("h", 0), ("i", 0), ("j", 0), ("k", 0), ("l", 0), ("m", 0), \
@@ -178,6 +213,9 @@ while True:
     # letters
     # (add all of the values of the letters for every matching word and return 
     # the highest value word?) Worked!
+    
+    # BUG: If a letter is yellow and it is in the position of a green letter,
+    # it's informational value should be 0
     informational_words = []
     for word in pre_green_matching_words:
         frequency_score = 0
@@ -192,20 +230,20 @@ while True:
     informational_words.sort(reverse=True, key=informational_words_sort)
     print("100% Created Informational Words")
     
-    print("----------")
+    print("\033[1;37;48m----------")
     print(str(len(matching_words)) + " possible word(s)")
     print("----------")
     print(matching_words)
     print("----------")
-    print("10 most frequent words:")
+    print("10 most common words:")
     if len(most_frequent_words) < 10:
         for i in range(len(most_frequent_words)):
-            print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(int(round(int(most_frequent_words[i][1])/int(most_frequent_words[-1][1]), 0))) + ")")
+            print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(round(float(most_frequent_words[i][1])*100/1226734006, 2)) + "%)")
     else:
         for i in range(10):
-            print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(int(round(int(most_frequent_words[i][1])/int(most_frequent_words[-1][1]), 0))) + ")")
+            print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(round(float(most_frequent_words[i][1])*100/1226734006, 2)) + "%)")
     print("----------")
-    print("Recommended words for maximum info: ")
+    print("10 recommended words for maximum info: ")
     if len(informational_words) < 10:
         for i in range(len(most_frequent_words)):
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")")
