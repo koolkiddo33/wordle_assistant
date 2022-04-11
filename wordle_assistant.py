@@ -14,6 +14,21 @@ txt = file.read().split("\",\"")
 file.close()
 txt.sort()
 
+print("\033[0;36;48mWelcome to Wordle Assistant v1.02")
+print("Coded by Brayden Taylor")
+print("Last updated April 2022")
+print()
+print("\033[0;37;48mThe Wordle Assistant is a device used to help you solve Wordles by giving you words that are possible answers and words that give you the most info.")
+print("An example entry where the word is \"apple\" may look something like this: ")
+print("\033[0;37;48m----------")
+print("\033[1;32;48mGreen letters (other letters represented by \"-\"): \033[1;37;48ma-p-e")
+print("\033[1;33;48mYellow letters (seperated by \" \"): \033[1;37;48ml")
+print("\033[1;33;48mPosition(s) of yellow \"l\": \033[1;37;48m1 2")
+print("\033[1;30;48mBlack letters (seperated by \" \"): \033[1;37;48mr o s")
+print("\033[0;37;48m----------")
+print("Note: You must input ALL of the info, not just the latest word that you guessed. (If a yellow letter's position is revealed (turns green) you may omit its entry)")
+print()
+
 while True:
     raw_user_green = (input("\033[1;32;48mGreen letters (other letters represented by \"-\"): "))
     if len(raw_user_green) != 5 and raw_user_green != "":
