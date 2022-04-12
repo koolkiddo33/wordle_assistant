@@ -6,6 +6,7 @@ April 2022
 
 import re
 import os
+import time
 
 os.system("")
 
@@ -14,7 +15,7 @@ txt = file.read().split("\",\"")
 file.close()
 txt.sort()
 
-print("\033[0;36;48mWelcome to Wordle Assistant v1.02")
+print("\033[0;36;48mWelcome to Wordle Assistant v1.03")
 print("Coded by Brayden Taylor")
 print("Last updated April 2022")
 print()
@@ -67,8 +68,9 @@ while True:
     print("\033[0;37;48mProcessing...")
     letter_index = 0
     for letter in user_black:
-        if letter in raw_user_green or letter in user_yellow:
-            user_black = user_black[:letter_index] + user_black[letter_index + 1:]
+        for tup in user_yellow:
+            if letter in raw_user_green or letter in tup:
+                user_black = user_black[:letter_index] + user_black[letter_index + 1:]
         letter_index += 1
 
     matching_words = []
@@ -174,12 +176,24 @@ while True:
     
     # OPTIMIZATION: remove the non 5 letter words from the csv and
     # access that so it doesn't have to every time Worked? Can't really tell the diff :/
+    
+    # Consider using a dif list:
+    # https://www.wordfrequency.info/samples.asp
+        # https://www.wordfrequency.info/files/entriesWithoutCollocates.txt
+        # https://www.wordfrequency.info/samples/words_219k.txt
+    # vvvvv
+    # https://raw.githubusercontent.com/IlyaSemenov/wikipedia-word-frequency/master/results/enwiki-20190320-words-frequency.txt
+        # https://github.com/IlyaSemenov/wikipedia-word-frequency/blob/master/results/enwiki-20210820-words-frequency.txt
+    # ^^^^^ This one seems good
+    # I could combine multiple lists and average them to get the most complete set?
+    
     most_frequent_words_all = []
-    f = open("freq_five_letters.txt", "r")
+    f = open("freq_five_letters_2.txt", "r")
     for line in f:
         line = line.strip("\n")
         most_frequent_words_all.append((line[:5], line[6:]))
     f.close()
+    
     most_frequent_words = []
     for tup in most_frequent_words_all:
         if tup[0] in matching_words:
