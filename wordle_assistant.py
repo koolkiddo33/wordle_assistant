@@ -15,7 +15,7 @@ txt = file.read().split("\",\"")
 file.close()
 txt.sort()
 
-print("\033[0;36;48mWelcome to Wordle Assistant v1.03")
+print("\033[0;36;48mWelcome to Wordle Assistant v1.04")
 print("Coded by Brayden Taylor")
 print("Last updated April 2022")
 print()
@@ -31,7 +31,7 @@ print("Note: You must input ALL of the info, not just the latest word that you g
 print()
 
 while True:
-    raw_user_green = (input("\033[1;32;48mGreen letters (other letters represented by \"-\"): "))
+    raw_user_green = (input("\033[1;32;48mGreen letters (other letters represented by \"-\"): ")).lower()
     if len(raw_user_green) != 5 and raw_user_green != "":
         print("Incorrect number of characters")
         continue
@@ -44,7 +44,8 @@ while True:
             all_green_pos.append(i)
         i += 1
     user_green = rez
-    user_yellow = input("\033[1;33;48mYellow letters (seperated by \" \"): ").split(" ")
+    # Check for correct input
+    user_yellow = input("\033[1;33;48mYellow letters (seperated by \" \"): ").lower().split(" ")
     if user_yellow == [""]:
         user_yellow = []
     # I could get the positions of user_yellow by asking the user for the 
@@ -64,7 +65,7 @@ while True:
     if len(user_yellow) > 4:
         user_yellow_4 = (user_yellow[4], input("Position(s) of \"" + user_yellow[4][0] + "\": ").split(" "))
         user_yellow[4] = user_yellow_4
-    user_black = input("\033[1;30;48mBlack letters (seperated by \" \"): ").split(" ")
+    user_black = input("\033[1;30;48mBlack letters (seperated by \" \"): ").lower().split(" ")
     print("\033[0;37;48mProcessing...")
     letter_index = 0
     for letter in user_black:
@@ -137,7 +138,7 @@ while True:
                             break_out_flag = True
                             break
             word_index += 1
-    print("17% Processed Yellow")
+    print("17% Processed Yellow", end="\r")
     
     if user_black != [""]:
         word_index = 0
@@ -149,7 +150,7 @@ while True:
                     word_index -= 1
                     break
             word_index += 1
-    print("33% Processed Black")
+    print("33% Processed Black", end="\r")
     
     pre_green_matching_words = matching_words
     
@@ -172,7 +173,7 @@ while True:
                     break
                 i += 1
             word_index += 1
-    print("50% Processed Green")
+    print("50% Processed Green", end="\r")
     
     # OPTIMIZATION: remove the non 5 letter words from the csv and
     # access that so it doesn't have to every time Worked? Can't really tell the diff :/
@@ -198,11 +199,7 @@ while True:
     for tup in most_frequent_words_all:
         if tup[0] in matching_words:
             most_frequent_words.append(tup)
-    total_freq = 0
-    for word in most_frequent_words:
-        freq = int(word[1])
-        total_freq += freq
-    print("67% Created Most Common Words")
+    print("67% Created Most Common Words", end="\r")
     
     # Most frequent letters in matching words using a list of tuples
     most_frequent_letters = [("a", 0), ("b", 0), ("c", 0), ("d", 0), ("e", 0), ("f", 0), ("g", 0), ("h", 0), ("i", 0), ("j", 0), ("k", 0), ("l", 0), ("m", 0), \
@@ -267,12 +264,13 @@ while True:
     def most_frequent_letters_sort(tup):
         return tup[1]
     most_frequent_letters.sort(reverse=True, key=most_frequent_letters_sort)
-    print("83% Created Most Frequent Letters")
+    print("83% Created Most Frequent Letters", end="\r")
 
     # From that, print a word that contains the most amount of most frequent 
     # letters
     # (add all of the values of the letters for every matching word and return 
     # the highest value word?) Worked!
+    # BUG: Not printing words if it has a black letter in it
     informational_words = []
     for word in pre_green_matching_words:
         frequency_score = 0
@@ -287,25 +285,38 @@ while True:
     informational_words.sort(reverse=True, key=informational_words_sort)
     print("100% Created Informational Words")
     
+    for index, word in enumerate(most_frequent_words):
+        if word[0] not in possible_answers:
+            most_frequent_words = most_frequent_words[:index] + most_frequent_words[index + 1:]
+            index -= 1
+    
+    total_freq = 0
+    for word in most_frequent_words:
+        freq = int(word[1])
+        total_freq += freq
+
+    most_frequent_words_stripped = []
+    for word in most_frequent_words:
+        most_frequent_words_stripped.append(word[0])
+
     print("\033[1;37;48m----------")
-    print(str(len(matching_words)) + " possible word(s)")
+    print(str(len(most_frequent_words)) + " possible word(s)")
     print("----------")
-    if len(matching_words) < 200 and len(matching_words) != 0:
-        print(matching_words)
-        print("----------")
+    if len(most_frequent_words_stripped) < 200 and len(most_frequent_words_stripped) != 0:
+        print(most_frequent_words_stripped)
+        print("\n----------")
     # Consider printing the info along with the percentage
     print("10 most common words:")
     for i in range(len(most_frequent_words)):
-        percentage = ((int(most_frequent_words[i][1]))*100/total_freq + 100/len(matching_words))/2 # Add percentage of correct random guess divided by len(matching_words)
-        percentage = float(percentage)
+        percentage = ((int(most_frequent_words[i][1]))*100/total_freq + 100/len(most_frequent_words))/2
         percentage = round(percentage, 2)
         print(str(i + 1) + ": " + most_frequent_words[i][0] + " (" + str(percentage) + "%)")
         if i == 9:
             break
     print("----------")
     print("10 recommended words for maximum info: ")
-    for i in range(len(most_frequent_words)):
-        if informational_words[i][0] in matching_words:
+    for i in range(len(informational_words)):
+        if informational_words[i][0] in most_frequent_words_stripped:
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")*")
         else:
             print(informational_words[i][0] + " (" + str(informational_words[i][1]) + ")")
